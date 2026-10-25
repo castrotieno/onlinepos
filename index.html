@@ -11,148 +11,324 @@
 
 <div id="authScreen" class="auth-wrap hidden">
   <div class="auth-card">
+    <div class="logo-badge">SB</div>
     <h1>SmallBiz POS</h1>
-    <p class="muted">Inventory & Point of Sale</p>
-    <input id="authEmail" type="email" placeholder="Email" />
+    <p class="muted">Inventory, sales & business insights</p>
+    <input id="authEmail" type="email" placeholder="Email address" />
     <input id="authPassword" type="password" placeholder="Password" />
-    <button id="signInBtn" class="primary">Sign in</button>
-    <button id="signUpBtn" class="ghost">Create account</button>
+    <button id="signInBtn" class="btn primary full">Sign in</button>
+    <button id="signUpBtn" class="btn ghost full">Create account</button>
     <p id="authMsg" class="error"></p>
   </div>
 </div>
 
 <div id="appScreen" class="hidden">
-  <header>
-    <div class="brand">SmallBiz POS</div>
+  <aside class="sidebar">
+    <div class="side-brand">
+      <div class="logo-badge">SB</div>
+      <div>
+        <strong>SmallBiz</strong>
+        <span>POS & Inventory</span>
+      </div>
+    </div>
+
     <nav>
-      <button class="tab active" data-tab="dashboard">Dashboard</button>
-      <button class="tab" data-tab="pos">POS</button>
-      <button class="tab" data-tab="products">Products</button>
-      <button class="tab" data-tab="stock">Stock</button>
-      <button class="tab" data-tab="sales">Sales</button>
+      <button class="nav-item active" data-view="dashboard"><span>📊</span> Dashboard</button>
+      <button class="nav-item" data-view="pos"><span>🛒</span> Point of Sale</button>
+      <button class="nav-item" data-view="products"><span>📦</span> Products</button>
+      <button class="nav-item" data-view="stock"><span>🔄</span> Stock</button>
+      <button class="nav-item" data-view="sales"><span>🧾</span> Sales Log</button>
+      <button class="nav-item" data-view="reports"><span>📈</span> Reports</button>
     </nav>
-    <button id="signOutBtn" class="ghost small">Sign out</button>
-  </header>
 
-  <main>
-    <section id="tab-dashboard" class="tab-page">
-      <h2>Dashboard</h2>
-      <div class="cards">
-        <div class="card"><span>Today's sales</span><strong id="kpiSales">0</strong></div>
-        <div class="card"><span>Today's profit</span><strong id="kpiProfit">0</strong></div>
-        <div class="card"><span>Products</span><strong id="kpiProducts">0</strong></div>
-        <div class="card warn"><span>Low stock items</span><strong id="kpiLow">0</strong></div>
+    <div class="side-footer">
+      <button id="refreshBtn" class="btn ghost full">🔄 Refresh</button>
+      <button id="sampleDataBtn" class="btn soft full">✨ Load sample data</button>
+      <button id="resetDataBtn" class="btn danger-ghost full">⚠️ Reset data</button>
+      <button id="signOutBtn" class="btn ghost full">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle" class="muted">Business overview</p>
       </div>
-      <h3>Reorder alerts</h3>
-      <table id="lowStockTable">
-        <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Reorder level</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
+      <div class="topbar-actions">
+        <span id="syncStatus" class="pill">Connected</span>
+      </div>
+    </header>
 
-    <section id="tab-pos" class="tab-page hidden">
-      <h2>Point of Sale</h2>
-      <div class="pos-grid">
-        <div>
-          <input id="posSearch" placeholder="Search product name or SKU..." />
-          <div id="posProducts" class="pos-products"></div>
-        </div>
-        <div class="cart">
-          <h3>Cart</h3>
-          <table id="cartTable">
-            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
-          <div class="cart-summary">
-            <div><span>Subtotal</span><strong id="cartSubtotal">0</strong></div>
-            <div><span>Discount</span><input id="cartDiscount" type="number" min="0" step="0.01" value="0" /></div>
-            <div><span>Total</span><strong id="cartTotal">0</strong></div>
+    <main>
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-icon green">💰</div>
+            <div><span>Today's revenue</span><strong id="kpiRevenue">0</strong></div>
           </div>
-          <input id="cartCustomer" placeholder="Customer name (optional)" />
-          <select id="cartPayment">
-            <option value="cash">Cash</option>
-            <option value="card">Card</option>
-            <option value="mobile">Mobile money</option>
-            <option value="other">Other</option>
-          </select>
-          <button id="checkoutBtn" class="primary">Complete sale</button>
-          <button id="clearCartBtn" class="ghost">Clear cart</button>
+          <div class="kpi">
+            <div class="kpi-icon blue">📈</div>
+            <div><span>Today's profit</span><strong id="kpiProfit">0</strong></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon purple">🧾</div>
+            <div><span>Today's transactions</span><strong id="kpiTransactions">0</strong></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon orange">📦</div>
+            <div><span>Items sold today</span><strong id="kpiItemsSold">0</strong></div>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <section id="tab-products" class="tab-page hidden">
-      <div class="row-between">
-        <h2>Products</h2>
-        <button id="newProductBtn" class="primary">+ New product</button>
-      </div>
-      <input id="productSearch" placeholder="Search products..." />
-      <table id="productsTable">
-        <thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Reorder</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
+        <div class="panel-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Reorder alerts</h3>
+              <span class="pill warn" id="lowCount">0 items</span>
+            </div>
+            <div class="table-wrap">
+              <table id="lowStockTable">
+                <thead><tr><th>Product</th><th>Stock</th><th>Reorder at</th><th>Status</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
 
-    <section id="tab-stock" class="tab-page hidden">
-      <div class="row-between">
-        <h2>Stock movements</h2>
-        <button id="newMovementBtn" class="primary">+ Stock In / Out</button>
-      </div>
-      <table id="movementsTable">
-        <thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Note</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recent sales</h3>
+              <button class="btn ghost small" data-goto="sales">View all</button>
+            </div>
+            <div class="table-wrap">
+              <table id="recentSalesTable">
+                <thead><tr><th>Time</th><th>Customer</th><th>Total</th><th>Profit</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <section id="tab-sales" class="tab-page hidden">
-      <h2>Sales</h2>
-      <table id="salesTable">
-        <thead><tr><th>Date</th><th>Customer</th><th>Payment</th><th>Items</th><th>Total</th><th>Profit</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </main>
+      <!-- POS -->
+      <section id="view-pos" class="view hidden">
+        <div class="pos-layout">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Products</h3>
+              <input id="posSearch" placeholder="Search name or SKU..." />
+            </div>
+            <div id="posProducts" class="product-grid"></div>
+          </div>
+
+          <div class="panel cart-panel">
+            <div class="panel-head">
+              <h3>Current sale</h3>
+              <button id="clearCartBtn" class="btn ghost small">Clear</button>
+            </div>
+            <div class="table-wrap">
+              <table id="cartTable">
+                <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="cart-form">
+              <div class="field-row">
+                <div><label>Customer</label><input id="cartCustomer" placeholder="Walk-in customer" /></div>
+                <div><label>Payment</label>
+                  <select id="cartPayment">
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="mobile">Mobile money</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-row">
+                <div><label>Discount</label><input id="cartDiscount" type="number" min="0" step="0.01" value="0" /></div>
+                <div class="total-box"><span>Total</span><strong id="cartTotal">0</strong></div>
+              </div>
+              <button id="checkoutBtn" class="btn primary full large">Complete sale & print receipt</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section id="view-products" class="view hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Product catalog</h3>
+            <div class="head-actions">
+              <input id="productSearch" placeholder="Search products..." />
+              <button id="newProductBtn" class="btn primary">+ Add product</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="productsTable">
+              <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Margin</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- STOCK -->
+      <section id="view-stock" class="view hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Stock movements</h3>
+            <button id="newMovementBtn" class="btn primary">+ Stock In / Out</button>
+          </div>
+          <div class="table-wrap">
+            <table id="movementsTable">
+              <thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Quantity</th><th>Note</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALES LOG -->
+      <section id="view-sales" class="view hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Sales log</h3>
+            <div class="head-actions">
+              <input id="salesSearch" placeholder="Search customer..." />
+              <input id="salesFrom" type="date" />
+              <input id="salesTo" type="date" />
+              <button id="salesFilterBtn" class="btn soft">Filter</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="salesTable">
+              <thead><tr><th>Date</th><th>Receipt</th><th>Customer</th><th>Payment</th><th>Items</th><th>Total</th><th>Profit</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section id="view-reports" class="view hidden">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Business reports</h3>
+            <div class="head-actions">
+              <input id="reportFrom" type="date" />
+              <input id="reportTo" type="date" />
+              <button id="generateReportBtn" class="btn primary">Generate</button>
+              <button id="printReportBtn" class="btn soft">🖨️ Print report</button>
+            </div>
+          </div>
+
+          <div id="reportArea">
+            <div class="kpi-grid">
+              <div class="kpi"><div class="kpi-icon green">💰</div><div><span>Revenue</span><strong id="repRevenue">0</strong></div></div>
+              <div class="kpi"><div class="kpi-icon blue">📈</div><div><span>Profit</span><strong id="repProfit">0</strong></div></div>
+              <div class="kpi"><div class="kpi-icon purple">🧾</div><div><span>Transactions</span><strong id="repTransactions">0</strong></div></div>
+              <div class="kpi"><div class="kpi-icon orange">📦</div><div><span>Items sold</span><strong id="repItems">0</strong></div></div>
+            </div>
+
+            <div class="panel-grid">
+              <div class="panel">
+                <div class="panel-head"><h3>Daily sales</h3></div>
+                <div class="table-wrap">
+                  <table id="dailyReportTable">
+                    <thead><tr><th>Date</th><th>Transactions</th><th>Revenue</th><th>Profit</th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head"><h3>Best-selling products</h3></div>
+                <div class="table-wrap">
+                  <table id="topProductsTable">
+                    <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th><th>Profit</th></tr></thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>
 
+<!-- PRODUCT MODAL -->
 <div id="productModal" class="modal hidden">
   <div class="modal-card">
-    <h3 id="productModalTitle">New product</h3>
-    <input id="pName" placeholder="Product name" />
-    <input id="pSku" placeholder="SKU / barcode" />
-    <input id="pCategory" placeholder="Category" />
-    <input id="pUnit" placeholder="Unit (pcs, kg, box)" value="pcs" />
-    <div class="grid2">
-      <input id="pCost" type="number" min="0" step="0.01" placeholder="Cost price" />
-      <input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price" />
-      <input id="pStock" type="number" min="0" step="0.01" placeholder="Opening stock" />
-      <input id="pReorder" type="number" min="0" step="0.01" placeholder="Reorder level" />
+    <div class="modal-head">
+      <h3 id="productModalTitle">Add product</h3>
+      <button class="icon-btn" id="closeProductBtn">✕</button>
     </div>
+    <label>Product name</label><input id="pName" placeholder="e.g. Rice 5kg" />
+    <div class="grid2">
+      <div><label>SKU / barcode</label><input id="pSku" placeholder="Optional" /></div>
+      <div><label>Category</label><input id="pCategory" placeholder="e.g. Groceries" /></div>
+      <div><label>Unit</label><input id="pUnit" value="pcs" /></div>
+      <div><label>Reorder level</label><input id="pReorder" type="number" min="0" step="0.01" value="0" /></div>
+      <div><label>Cost price</label><input id="pCost" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+      <div><label>Selling price</label><input id="pPrice" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+    </div>
+    <label>Opening stock</label><input id="pStock" type="number" min="0" step="0.01" value="0" />
     <div class="modal-actions">
-      <button id="saveProductBtn" class="primary">Save</button>
-      <button id="closeProductBtn" class="ghost">Cancel</button>
+      <button id="saveProductBtn" class="btn primary">Save product</button>
+      <button id="cancelProductBtn" class="btn ghost">Cancel</button>
     </div>
     <p id="productMsg" class="error"></p>
   </div>
 </div>
 
+<!-- MOVEMENT MODAL -->
 <div id="movementModal" class="modal hidden">
   <div class="modal-card">
-    <h3>Stock movement</h3>
-    <select id="mProduct"></select>
-    <select id="mType">
-      <option value="in">Stock In</option>
-      <option value="out">Stock Out</option>
-    </select>
-    <input id="mQty" type="number" min="0.01" step="0.01" placeholder="Quantity" />
-    <input id="mNote" placeholder="Note (supplier, damage, etc.)" />
+    <div class="modal-head">
+      <h3>Record stock movement</h3>
+      <button class="icon-btn" id="closeMovementBtn">✕</button>
+    </div>
+    <label>Product</label><select id="mProduct"></select>
+    <div class="grid2">
+      <div><label>Movement</label>
+        <select id="mType">
+          <option value="in">Stock In</option>
+          <option value="out">Stock Out</option>
+        </select>
+      </div>
+      <div><label>Quantity</label><input id="mQty" type="number" min="0.01" step="0.01" placeholder="0.00" /></div>
+    </div>
+    <label>Note</label><input id="mNote" placeholder="Supplier, damage, correction..." />
     <div class="modal-actions">
-      <button id="saveMovementBtn" class="primary">Save</button>
-      <button id="closeMovementBtn" class="ghost">Cancel</button>
+      <button id="saveMovementBtn" class="btn primary">Save movement</button>
+      <button id="cancelMovementBtn" class="btn ghost">Cancel</button>
     </div>
     <p id="movementMsg" class="error"></p>
   </div>
 </div>
 
+<!-- RECEIPT MODAL -->
+<div id="receiptModal" class="modal hidden">
+  <div class="modal-card receipt-card">
+    <div class="modal-head no-print">
+      <h3>Sale receipt</h3>
+      <button class="icon-btn" id="closeReceiptBtn">✕</button>
+    </div>
+    <div id="receiptContent" class="receipt"></div>
+    <div class="modal-actions no-print">
+      <button id="printReceiptBtn" class="btn primary">🖨️ Print receipt</button>
+      <button id="closeReceipt2Btn" class="btn ghost">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT AREA -->
+<div id="printArea" class="print-only"></div>
 <div id="toast" class="toast hidden"></div>
 
 <script src="config.js"></script>
