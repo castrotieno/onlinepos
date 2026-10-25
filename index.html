@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SmallBiz POS & Inventory</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="authScreen" class="auth-wrap hidden">
+  <div class="auth-card">
+    <h1>SmallBiz POS</h1>
+    <p class="muted">Inventory & Point of Sale</p>
+    <input id="authEmail" type="email" placeholder="Email" />
+    <input id="authPassword" type="password" placeholder="Password" />
+    <button id="signInBtn" class="primary">Sign in</button>
+    <button id="signUpBtn" class="ghost">Create account</button>
+    <p id="authMsg" class="error"></p>
+  </div>
+</div>
+
+<div id="appScreen" class="hidden">
+  <header>
+    <div class="brand">SmallBiz POS</div>
+    <nav>
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="pos">POS</button>
+      <button class="tab" data-tab="products">Products</button>
+      <button class="tab" data-tab="stock">Stock</button>
+      <button class="tab" data-tab="sales">Sales</button>
+    </nav>
+    <button id="signOutBtn" class="ghost small">Sign out</button>
+  </header>
+
+  <main>
+    <section id="tab-dashboard" class="tab-page">
+      <h2>Dashboard</h2>
+      <div class="cards">
+        <div class="card"><span>Today's sales</span><strong id="kpiSales">0</strong></div>
+        <div class="card"><span>Today's profit</span><strong id="kpiProfit">0</strong></div>
+        <div class="card"><span>Products</span><strong id="kpiProducts">0</strong></div>
+        <div class="card warn"><span>Low stock items</span><strong id="kpiLow">0</strong></div>
+      </div>
+      <h3>Reorder alerts</h3>
+      <table id="lowStockTable">
+        <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Reorder level</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-pos" class="tab-page hidden">
+      <h2>Point of Sale</h2>
+      <div class="pos-grid">
+        <div>
+          <input id="posSearch" placeholder="Search product name or SKU..." />
+          <div id="posProducts" class="pos-products"></div>
+        </div>
+        <div class="cart">
+          <h3>Cart</h3>
+          <table id="cartTable">
+            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="cart-summary">
+            <div><span>Subtotal</span><strong id="cartSubtotal">0</strong></div>
+            <div><span>Discount</span><input id="cartDiscount" type="number" min="0" step="0.01" value="0" /></div>
+            <div><span>Total</span><strong id="cartTotal">0</strong></div>
+          </div>
+          <input id="cartCustomer" placeholder="Customer name (optional)" />
+          <select id="cartPayment">
+            <option value="cash">Cash</option>
+            <option value="card">Card</option>
+            <option value="mobile">Mobile money</option>
+            <option value="other">Other</option>
+          </select>
+          <button id="checkoutBtn" class="primary">Complete sale</button>
+          <button id="clearCartBtn" class="ghost">Clear cart</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-products" class="tab-page hidden">
+      <div class="row-between">
+        <h2>Products</h2>
+        <button id="newProductBtn" class="primary">+ New product</button>
+      </div>
+      <input id="productSearch" placeholder="Search products..." />
+      <table id="productsTable">
+        <thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Reorder</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-stock" class="tab-page hidden">
+      <div class="row-between">
+        <h2>Stock movements</h2>
+        <button id="newMovementBtn" class="primary">+ Stock In / Out</button>
+      </div>
+      <table id="movementsTable">
+        <thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Note</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="tab-sales" class="tab-page hidden">
+      <h2>Sales</h2>
+      <table id="salesTable">
+        <thead><tr><th>Date</th><th>Customer</th><th>Payment</th><th>Items</th><th>Total</th><th>Profit</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<div id="productModal" class="modal hidden">
+  <div class="modal-card">
+    <h3 id="productModalTitle">New product</h3>
+    <input id="pName" placeholder="Product name" />
+    <input id="pSku" placeholder="SKU / barcode" />
+    <input id="pCategory" placeholder="Category" />
+    <input id="pUnit" placeholder="Unit (pcs, kg, box)" value="pcs" />
+    <div class="grid2">
+      <input id="pCost" type="number" min="0" step="0.01" placeholder="Cost price" />
+      <input id="pPrice" type="number" min="0" step="0.01" placeholder="Selling price" />
+      <input id="pStock" type="number" min="0" step="0.01" placeholder="Opening stock" />
+      <input id="pReorder" type="number" min="0" step="0.01" placeholder="Reorder level" />
+    </div>
+    <div class="modal-actions">
+      <button id="saveProductBtn" class="primary">Save</button>
+      <button id="closeProductBtn" class="ghost">Cancel</button>
+    </div>
+    <p id="productMsg" class="error"></p>
+  </div>
+</div>
+
+<div id="movementModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Stock movement</h3>
+    <select id="mProduct"></select>
+    <select id="mType">
+      <option value="in">Stock In</option>
+      <option value="out">Stock Out</option>
+    </select>
+    <input id="mQty" type="number" min="0.01" step="0.01" placeholder="Quantity" />
+    <input id="mNote" placeholder="Note (supplier, damage, etc.)" />
+    <div class="modal-actions">
+      <button id="saveMovementBtn" class="primary">Save</button>
+      <button id="closeMovementBtn" class="ghost">Cancel</button>
+    </div>
+    <p id="movementMsg" class="error"></p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
